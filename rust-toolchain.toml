@@ -1,0 +1,6 @@
+# Pinned so that every build -- local, CI, or a third party checking the
+# deployed module hash -- uses the same compiler. Changing this changes the wasm.
+[toolchain]
+channel = "1.97.1"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

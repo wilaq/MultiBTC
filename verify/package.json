@@ -1,0 +1,15 @@
+{
+  "name": "multibtc-attestation-verifier",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone, canister-independent verifier for multiBTC Holders Group wallet attestations.",
+  "scripts": {
+    "verify": "node verify-attestation.mjs",
+    "test": "node selftest.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.8.0"
+  }
+}

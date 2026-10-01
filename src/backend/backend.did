@@ -1,0 +1,345 @@
+type CommChannel = variant {
+  Email;
+  Telegram;
+  Other : text;
+};
+
+type FeePreference = variant {
+  UpfrontCostShare;
+  LitigationFunding;
+  ProportionalToClaim;
+  Undecided;
+};
+
+type NamingPreference = variant {
+  WillingToBeNamed;
+  AnonymousViaRepresentative;
+};
+
+type PositionType = variant {
+  RawToken;
+  Lp : record { protocol : text; pool : text };
+  Vault : record { protocol : text; name : text };
+  Other : text;
+};
+
+type PositionDetail = record {
+  chain : text;
+  kind : PositionType;
+  declared_multibtc : nat;
+};
+
+type BridgeAttempt = record {
+  chain : text;
+  tx_hash : text;
+  description : opt text;
+};
+
+type PostIncidentAcquisition = record {
+  acquisition_date_iso : text;
+  chain : text;
+  amount_multibtc : nat;
+  price_paid_usd : opt float64;
+  notes : opt text;
+};
+
+type HolderProfile = record {
+  revision : nat32;
+  "principal" : principal;
+  legal_name : text;
+  date_of_birth_iso : text;
+  nationality : text;
+  country_of_residence : text;
+  email : text;
+  telegram_handle : opt text;
+  preferred_comm_channel : CommChannel;
+  has_filed_pod : bool;
+  pod_filed_date_iso : opt text;
+  pod_reference : opt text;
+  needs_help_filing_pod : bool;
+  consent_group_representation : bool;
+  consent_data_use_for_legal : bool;
+  ack_engagement_letter_to_follow : bool;
+  ack_fee_structure : bool;
+  ack_group_strategy_coordinated : bool;
+  ack_site_not_affiliated : bool;
+  truthfully_attested : bool;
+  fee_preference : FeePreference;
+  preferred_payment_method : opt text;
+  naming_preference : NamingPreference;
+  other_multichain_claims : opt text;
+  additional_documentation_notes : opt text;
+  submitted_at_ns : nat64;
+};
+
+type WalletAttestation = record {
+  revision : nat32;
+  holder_revision : nat32;
+  wallet_address : text;
+  linked_principal : principal;
+  detected_eth : nat;
+  detected_bsc : nat;
+  detected_polygon : nat;
+  detected_canto : nat;
+  positions : vec PositionDetail;
+  approximate_total_claim : opt nat;
+  held_pre_incident : bool;
+  acquired_post_incident : bool;
+  post_incident_acquisitions : vec PostIncidentAcquisition;
+  attempted_bridge_redemption : bool;
+  bridge_attempts : vec BridgeAttempt;
+  pod_filed_for_this_wallet : bool;
+  pod_reference_for_this_wallet : opt text;
+  support_tx_hashes : vec text;
+  signed_message : text;
+  signature : text;
+  nonce : text;
+  signed_at_iso : text;
+  data_commitment_sha256 : text;
+  submitted_at_ns : nat64;
+};
+
+type LinkPayload = record {
+  wallet_address : text;
+  signature : text;
+  nonce : text;
+  signed_at_iso : text;
+};
+
+type HolderPayload = record {
+  legal_name : text;
+  date_of_birth_iso : text;
+  nationality : text;
+  country_of_residence : text;
+  email : text;
+  telegram_handle : opt text;
+  preferred_comm_channel : CommChannel;
+  has_filed_pod : bool;
+  pod_filed_date_iso : opt text;
+  pod_reference : opt text;
+  needs_help_filing_pod : bool;
+  consent_group_representation : bool;
+  consent_data_use_for_legal : bool;
+  ack_engagement_letter_to_follow : bool;
+  ack_fee_structure : bool;
+  ack_group_strategy_coordinated : bool;
+  ack_site_not_affiliated : bool;
+  truthfully_attested : bool;
+  fee_preference : FeePreference;
+  preferred_payment_method : opt text;
+  naming_preference : NamingPreference;
+  other_multichain_claims : opt text;
+  additional_documentation_notes : opt text;
+};
+
+type AttestPayload = record {
+  wallet_address : text;
+  detected_eth : nat;
+  detected_bsc : nat;
+  detected_polygon : nat;
+  detected_canto : nat;
+  positions : vec PositionDetail;
+  approximate_total_claim : opt nat;
+  held_pre_incident : bool;
+  acquired_post_incident : bool;
+  post_incident_acquisitions : vec PostIncidentAcquisition;
+  attempted_bridge_redemption : bool;
+  bridge_attempts : vec BridgeAttempt;
+  pod_filed_for_this_wallet : bool;
+  pod_reference_for_this_wallet : opt text;
+  support_tx_hashes : vec text;
+  signature : text;
+  nonce : text;
+  signed_at_iso : text;
+  data_commitment_sha256 : text;
+};
+
+type AdminAuth = record {
+  signature : text;
+  nonce : text;
+  signed_at_iso : text;
+};
+
+type PublicStats = record {
+  total_holders : nat64;
+  total_wallets : nat64;
+  total_detected_eth : nat;
+  total_detected_bsc : nat;
+  total_detected_polygon : nat;
+  total_detected_canto : nat;
+  total_declared_claim : nat;
+  pre_incident_wallets : nat64;
+  post_incident_wallets : nat64;
+  pod_filed_holders : nat64;
+  last_submission_at_ns : nat64;
+};
+
+type AdminInfo = record {
+  eth_address : text;
+  "principal" : opt principal;
+  max_edits : nat32;
+  max_wallets_per_principal : nat64;
+};
+
+type WalletVerdict = record {
+  wallet_address : text;
+  revision : nat32;
+  holder_revision : nat32;
+  signature_valid : bool;
+  signature_error : opt text;
+  profile_current : bool;
+  onchain : vec ChainVerdict;
+};
+
+// Balances the canister read itself via HTTPS outcalls. Never part of a
+// signature; a failed read has `balance = null` and an `error`, never zero.
+type Snapshot = variant { PreIncident; Current };
+
+type ChainObservation = record {
+  chain : text;
+  snapshot : Snapshot;
+  block : opt nat64;
+  balance : opt nat;
+  error : opt text;
+  provider : opt text;
+  observed_at_ns : nat64;
+  // opt false: one node made the call, so no subnet consensus backs it.
+  replicated : opt bool;
+};
+
+type ChainVerdict = record {
+  chain : text;
+  pre_incident : opt ChainObservation;
+  current : opt ChainObservation;
+  detected_matches_current : opt bool;
+};
+
+type HttpHeader = record { name : text; value : text };
+type HttpResponse = record { status : nat; headers : vec HttpHeader; body : blob };
+type TransformArgs = record { response : HttpResponse; context : blob };
+
+type HolderOverview = record {
+  "principal" : principal;
+  telegram_handle : opt text;
+  holder_revision : nat32;
+  wallets : vec WalletVerdict;
+  unattested_wallets : vec text;
+};
+
+type ResultOverview   = variant { Ok : vec HolderOverview; Err : text };
+
+// --- Governance ---
+type VoteChoice = variant { Yes; No };
+
+type ProposalKind = variant {
+  Decision;
+  GrantDataAccess : record { grantee : principal; duration_days : nat32 };
+  AddController : record { controller : principal };
+};
+
+type Outcome = record {
+  passed : bool;
+  reason : text;
+  resolved_at_ns : nat64;
+  yes : nat32;
+  no : nat32;
+  eligible : nat32;
+  tiebreak_yes_balance : opt nat;
+  tiebreak_no_balance : opt nat;
+  executed_at_ns : opt nat64;
+  execution_error : opt text;
+  execution_started_at_ns : opt nat64;
+};
+
+// Tallies only; individual ballots are never exposed.
+type ProposalView = record {
+  id : nat64;
+  proposer : principal;
+  title : text;
+  description : text;
+  kind : ProposalKind;
+  created_at_ns : nat64;
+  deadline_ns : nat64;
+  yes : nat32;
+  no : nat32;
+  eligible_now : nat32;
+  awaiting_finalisation : bool;
+  outcome : opt Outcome;
+  access_expires_at_ns : opt nat64;
+  reads_at_ns : vec nat64;
+  my_vote : opt VoteChoice;
+};
+
+type CreateProposal = record { title : text; description : text; kind : ProposalKind };
+
+type HolderBundle = record {
+  profile : HolderProfile;
+  wallets : vec WalletAttestation;
+  holder_revisions : vec HolderProfile;
+  wallet_revisions : vec record { text; vec WalletAttestation };
+};
+
+type ResultId       = variant { Ok : nat64; Err : text };
+type ResultProposal = variant { Ok : ProposalView; Err : text };
+type ResultProposals = variant { Ok : vec ProposalView; Err : text };
+type ResultBundles  = variant { Ok : vec HolderBundle; Err : text };
+
+type WalletLinkStatus = variant { Unlinked; LinkedToCaller; LinkedToOther };
+
+type ResultUnit       = variant { Ok; Err : text };
+type ResultText       = variant { Ok : text; Err : text };
+type ResultHolder     = variant { Ok : HolderProfile; Err : text };
+type ResultWallet     = variant { Ok : WalletAttestation; Err : text };
+type ResultWalletList = variant { Ok : vec WalletAttestation; Err : text };
+
+service : {
+  // Identity binding
+  get_link_nonce            : (text) -> (ResultText);
+  link_wallet               : (LinkPayload) -> (ResultUnit);
+  get_wallet_link_status    : (text) -> (WalletLinkStatus) query;
+  get_wallets_for_principal : () -> (vec text) query;
+
+  // Holder layer
+  submit_holder             : (HolderPayload) -> (ResultHolder);
+  update_holder             : (HolderPayload) -> (ResultHolder);
+  get_my_holder             : () -> (opt HolderProfile) query;
+  get_holder_revisions      : () -> (vec HolderProfile) query;
+
+  // Wallet attestation layer
+  get_attest_nonce          : (text) -> (ResultText);
+  submit_wallet_attestation : (AttestPayload) -> (ResultWallet);
+  update_wallet_attestation : (AttestPayload) -> (ResultWallet);
+  get_my_wallets            : () -> (vec WalletAttestation) query;
+  get_wallet_revisions      : (text) -> (ResultWalletList) query;
+
+  // Public
+  get_public_stats          : () -> (PublicStats) query;
+  cycles_balance            : () -> (nat) query;
+
+  // Admin config (controller-only setters; public getter)
+  get_admin_info            : () -> (AdminInfo) query;
+  am_i_controller           : () -> (bool) query;
+  set_admin_eth_address     : (text) -> (ResultUnit);
+  set_admin_principal       : (opt principal) -> (ResultUnit);
+
+  // Admin (dual-factor: II principal == admin_principal AND signature recovers to admin_eth).
+  // There is deliberately no export or wipe of holder data, and no bulk read for
+  // the admin: the admin gets Telegram handles and canister-computed verdicts.
+  get_admin_nonce           : () -> (ResultText);
+  admin_overview            : (AdminAuth) -> (ResultOverview);
+  admin_verify_onchain      : (AdminAuth) -> (ResultOverview);
+
+  // Governance. Proposals are visible to holders (and the grantee they name).
+  create_proposal              : (CreateProposal) -> (ResultId);
+  admin_propose_add_controller : (AdminAuth, text, text, principal) -> (ResultId);
+  vote                         : (nat64, VoteChoice) -> (ResultProposal);
+  finalize_proposal            : (nat64) -> (ResultProposal);
+  list_proposals               : () -> (ResultProposals) query;
+  am_i_eligible_voter          : () -> (bool) query;
+  // The only bulk read: a principal granted access by a passed holder vote,
+  // for a limited time, every read logged on the proposal.
+  governed_read_all            : () -> (ResultBundles);
+
+  // Outcall response transform, invoked by the IC itself. Pure; reveals nothing.
+  transform_rpc             : (TransformArgs) -> (HttpResponse) query;
+};

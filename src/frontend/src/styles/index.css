@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-ink-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-ink-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-ink-300 bg-white px-5 py-2.5 text-sm font-semibold text-ink-900 hover:bg-ink-50 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-md bg-gold-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gold-700 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .field-label {
+    @apply block text-sm font-medium text-ink-800 mb-1;
+  }
+  .field-input {
+    @apply block w-full rounded-md border border-ink-400 bg-white text-ink-900 placeholder-ink-400 shadow-sm focus:border-ink-700 focus:ring-1 focus:ring-ink-700 sm:text-sm px-3 py-2;
+  }
+  .field-input-textarea {
+    @apply block w-full rounded-md border border-ink-400 bg-white text-ink-900 placeholder-ink-400 shadow-sm focus:border-ink-700 focus:ring-1 focus:ring-ink-700 sm:text-sm min-h-[80px] px-3 py-2;
+  }
+  .required-star {
+    @apply text-red-500 ml-0.5 font-semibold;
+  }
+  .help-text {
+    @apply text-xs text-ink-500 mt-1;
+  }
+  .card {
+    @apply rounded-lg border border-ink-200 bg-white shadow-sm;
+  }
+  .card-header {
+    @apply border-b border-ink-200 px-6 py-4;
+  }
+  .card-body {
+    @apply px-6 py-5;
+  }
+}

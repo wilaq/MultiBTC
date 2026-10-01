@@ -1,0 +1,33 @@
+# Reproducible build of the backend canister.
+#
+# Everything that ends up in the wasm is pinned here: the Rust toolchain, the
+# wasm target, dfx (which adds the candid and metadata sections), and the build
+# paths. Paths matter because rustc embeds source paths in panic messages, so a
+# native build embeds the builder's home directory and can never match anyone
+# else's. Inside this image every path is fixed, so any machine produces the
+# same bytes.
+#
+#   ./scripts/build-backend.sh      -> artifacts/backend.wasm and its SHA-256
+#   dfx canister info 7d7lc-byaaa-aaaah-qusjq-cai --network ic   -> must match
+FROM rust:1.97.1-slim-bookworm AS build
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV DFXVM_INIT_YES=true \
+    DFX_VERSION=0.30.2 \
+    DFX_WARNING=-mainnet_plaintext_identity \
+    DFX_TELEMETRY=off
+RUN sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+ENV PATH="/root/.local/share/dfx/bin:${PATH}"
+
+WORKDIR /build
+COPY rust-toolchain.toml ./
+RUN rustup show active-toolchain
+COPY Cargo.toml Cargo.lock dfx.json canister_ids.json ./
+COPY src/backend ./src/backend
+RUN dfx build backend --network ic
+
+FROM scratch AS artifact
+COPY --from=build /build/.dfx/ic/canisters/backend/backend.wasm /backend.wasm

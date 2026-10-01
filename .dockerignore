@@ -1,0 +1,9 @@
+# Only what the backend build needs. Excluding target/ matters: a host build
+# cache embeds host paths and would make the output irreproducible.
+*
+!Cargo.toml
+!Cargo.lock
+!rust-toolchain.toml
+!dfx.json
+!canister_ids.json
+!src/backend

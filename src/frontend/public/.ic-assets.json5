@@ -1,0 +1,33 @@
+// Headers for the asset canister. dfx reads this from the ASSET SOURCE directory
+// (dfx.json -> canisters.frontend.source = src/frontend/dist), so it lives in
+// public/ and Vite copies it into dist/ on every build. Putting it at
+// src/frontend/.ic-assets.json5 silently does nothing.
+//
+// The portal collects legal names, DOBs and emails and triggers wallet signature
+// prompts, and was previously served with no security headers at all.
+//
+// The CSP below is deliberately minimal: every directive here is inert for a
+// normal single-page app, so it cannot take the site down. `frame-ancestors
+// 'none'` is the one that matters -- it is the clickjacking fix for the
+// signature prompt, and it is fully enforced.
+//
+// A restrictive `connect-src` / `default-src` policy is prepared and commented
+// out below. Turn it on only after clicking through the real app in a browser
+// (II login, connect wallet, balance fetch on all four chains, sign, submit):
+// if an origin is missing from connect-src the failure is silent, and the RPC
+// list in src/lib/wagmi.ts is long and changes.
+//
+//   "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://icp0.io https://*.icp0.io https://ic0.app https://*.ic0.app https://id.ai https://*.id.ai https://1rpc.io https://bsc-dataseed.binance.org https://bsc-dataseed1.binance.org https://bsc-dataseed1.defibit.io https://bsc-dataseed1.ninicoin.io https://bsc-dataseed2.binance.org https://bsc-dataseed2.defibit.io https://bsc-dataseed2.ninicoin.io https://bsc-dataseed3.binance.org https://bsc-dataseed4.binance.org https://bsc.api.onfinality.io https://bsc.drpc.org https://bsc.publicnode.com https://canto-rpc.ansybl.io https://canto.evm.chandrastation.com https://canto.gravitychain.io https://canto.slingshot.finance https://cloudflare-eth.com https://eth-mainnet.public.blastapi.io https://eth-pokt.nodies.app https://eth.api.onfinality.io https://eth.drpc.org https://eth.llamarpc.com https://eth.merkle.io https://ethereum.publicnode.com https://jsonrpc.canto.nodestake.top https://mainnet.gateway.tenderly.co https://mainnode.plexnode.org:8545 https://polygon-bor-rpc.publicnode.com https://polygon-mainnet.public.blastapi.io https://polygon-pokt.nodies.app https://polygon-rpc.com https://polygon.api.onfinality.io https://polygon.drpc.org https://polygon.llamarpc.com https://polygon.publicnode.com https://rpc.ankr.com https://rpc.flashbots.net https://rpc.mevblocker.io https://rpc.payload.de; frame-src 'self' https://id.ai https://*.id.ai; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;"
+[
+  {
+    "match": "**/*",
+    "headers": {
+      "Content-Security-Policy": "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+      "X-Frame-Options": "DENY",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "same-origin",
+      "Permissions-Policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=()",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+    }
+  }
+]

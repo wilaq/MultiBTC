@@ -1,0 +1,60 @@
+# --- IC / dfx ---
+.dfx/
+.ic-assets.json5.bak
+canister/
+.env.local
+.env.*.local
+
+# --- Editor / agent tooling ---
+.claude/
+.claude-mem/
+CLAUDE.md.bak
+.serena/
+
+# --- Rust ---
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# --- Node / frontend ---
+node_modules/
+src/frontend/dist/
+src/frontend/.vite/
+src/frontend/coverage/
+*.tsbuildinfo
+declarations/
+.npm/
+.yarn/
+.pnpm-store/
+
+# --- Editor / OS ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# --- Local secrets / identities (never commit) ---
+*.pem
+*.p12
+identity.json
+
+# dfx regenerates this from dfx.json output_env_file; it also leaks local paths.
+.env
+
+# standalone verifier deps
+verify/node_modules/
+
+# tsc -b emits these next to the sources during `npm run build`
+src/frontend/src/**/*.js
+
+# reproducible build output (scripts/build-backend.sh)
+artifacts/
